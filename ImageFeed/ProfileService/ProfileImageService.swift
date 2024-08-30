@@ -25,22 +25,25 @@ final class ProfileImageService {
         
         guard var request = URLRequest.makeHTTPRequest(path: "/users/\(username)", httpMethod: "GET"),
               let token = oAuthTokenStorage.token else {
-                  assertionFailure("Failed to make HTTP request")
+                  print("[fetchProfileImageURL]: RequestError - Ошибка создания запроса для юзера: \(username)")
+                  completion(.failure(NSError(domain: "ProfileImageServiceError", code: -1, userInfo: nil)))
                   return
               }
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
-        let task = urlSession.objectTask(for: request) { [weak self] (result:Result<UserResult, Error>) in
+        let task = urlSession.objectTask(for: request) { [weak self] (result: Result<UserResult, Error>) in
             guard let self else { return }
             
             switch result {
             case .success(let user):
+                self.avatarURL = user.profileImage.large
+                print("[fetchProfileImageURL]: Success - URL: \(user.profileImage.large)")
                 completion(.success(user.profileImage.large))
                 NotificationCenter.default.post(name: ProfileImageService.didChangeNotification,
                                                 object: self,
                                                 userInfo: ["URL": user.profileImage.large])
-                self.avatarURL = user.profileImage.large
             case .failure(let error):
+                print("[fetchProfileImageURL]: NetworkError - \(error.localizedDescription), Username: \(username)")
                 completion(.failure(error))
             }
             self.task = nil
