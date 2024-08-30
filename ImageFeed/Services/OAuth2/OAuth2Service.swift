@@ -21,12 +21,15 @@ final class OAuth2Service {
         
         assert(Thread.isMainThread)
         
-        if lastCode == code { return }
+        if lastCode == code {
+            completion(.failure("Error code: \(code)" as! Error))
+            return
+        }
         task?.cancel()
         lastCode = code
         
         guard let request = makeRequest(code: code) else {
-            assertionFailure("Failed to make request")
+            completion(.failure("Failed to make request \(code)" as! Error))
             return
         }
         
