@@ -3,7 +3,7 @@ import ProgressHUD
 
 final class SplashViewController: UIViewController {
     
-    private let oauth2Service = OAuth2Service()
+    private let oauth2Service = OAuth2Service.shared
     private let oauth2TokenStorage = OAuth2TokenStorage()
     private let profileService = ProfileService.shared
 
@@ -94,8 +94,6 @@ extension SplashViewController: AuthViewControllerDelegate {
             case .failure:
                 UIBlockingProgressHUD.dismiss()
                 showAlert()
-                // TODO: Показать ошибку
-                // TODO: Sprint_11
             }
         }
     }
@@ -105,7 +103,6 @@ extension SplashViewController: AuthViewControllerDelegate {
             guard let self else { return }
             switch result {
             case .success(let profile):
-                //guard let userName = self.profileService.profile?.username else { return }
                 ProfileImageService.shared.fetchProfileImageURL(username: profile.username) { _ in }
                 self.switchToTabBarController()
                 UIBlockingProgressHUD.dismiss()

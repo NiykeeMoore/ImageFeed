@@ -4,10 +4,8 @@ final class OAuth2Service {
     
     static let shared = OAuth2Service()
     private let urlSession = URLSession.shared
-    
     private var task: URLSessionTask?
     private var lastCode: String?
-    
     private(set) var authToken: String? {
         get {
             return OAuth2TokenStorage().token
@@ -17,8 +15,12 @@ final class OAuth2Service {
         }
     }
     
+    private init(task: URLSessionTask? = nil, lastCode: String? = nil) {
+        self.task = task
+        self.lastCode = lastCode
+    }
+    
     func fetchAuthToken(code: String, completion: @escaping (Result<String, Error>) -> Void) {
-        
         assert(Thread.isMainThread)
         
         if lastCode == code {

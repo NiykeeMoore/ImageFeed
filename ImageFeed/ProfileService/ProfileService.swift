@@ -9,6 +9,12 @@ final class ProfileService {
     private var task: URLSessionTask?
     private var lastToken: String?
     
+    private init(profile: ProfileResult? = nil, task: URLSessionTask? = nil, lastToken: String? = nil) {
+        self.profile = profile
+        self.task = task
+        self.lastToken = lastToken
+    }
+    
     func fetchProfile(_ token: String, completion: @escaping (Result<ProfileResult, Error>) -> Void) {
         assert(Thread.isMainThread)
         if lastToken == token { return }

@@ -1,16 +1,16 @@
 import Foundation
 
+private struct UserResult: Codable {
+    let profileImage: ProfileImage
+}
+
+private struct ProfileImage: Codable {
+    let small: String
+    let medium: String
+    let large: String
+}
+
 final class ProfileImageService {
-    
-    private struct UserResult: Codable {
-        let profileImage: ProfileImage
-    }
-    
-    private struct ProfileImage: Codable {
-        let small: String
-        let medium: String
-        let large: String
-    }
     
     private var task: URLSessionTask?
     private(set) var avatarURL: String?
@@ -18,6 +18,11 @@ final class ProfileImageService {
     static let didChangeNotification = Notification.Name(rawValue: "ProfileImageProviderDidChange")
     private let urlSession = URLSession.shared
     private let oAuthTokenStorage = OAuth2TokenStorage()
+    
+    private init(task: URLSessionTask? = nil, avatarURL: String? = nil) {
+        self.task = task
+        self.avatarURL = avatarURL
+    }
     
     func fetchProfileImageURL(username: String, _ completion: @escaping (Result<String, Error>) -> Void ) {
         assert(Thread.isMainThread)

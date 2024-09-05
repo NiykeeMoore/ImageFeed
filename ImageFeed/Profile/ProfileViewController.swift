@@ -9,7 +9,6 @@ final class ProfileViewController: UIViewController {
     private let profilePhoto: UIImageView = {
         let image = UIImage(named: "userPhoto")
         let imageView = UIImageView(image: image)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
@@ -18,7 +17,6 @@ final class ProfileViewController: UIViewController {
         label.text = "Екатерина Новикова"
         label.textColor = .ypWhite
         label.font = UIFont.systemFont(ofSize: 23, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
@@ -27,7 +25,6 @@ final class ProfileViewController: UIViewController {
         label.text = "@ekaerina_nov"
         label.textColor = .ypGray
         label.font = UIFont.systemFont(ofSize: 13)
-        label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
@@ -36,7 +33,6 @@ final class ProfileViewController: UIViewController {
         label.text = "Hello, world!"
         label.textColor = .ypWhite
         label.font = UIFont.systemFont(ofSize: 13)
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
         return label
     }()
@@ -45,7 +41,6 @@ final class ProfileViewController: UIViewController {
         let button = UIButton()
         let image = UIImage(named: "ipad.and.arrow.forward")
         button.setImage(image, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
         return button
     }()
     
@@ -81,11 +76,12 @@ final class ProfileViewController: UIViewController {
     }
     
     private func setupViews() {
-        view.addSubview(profilePhoto)
-        view.addSubview(nameLabel)
-        view.addSubview(nicknameLabel)
-        view.addSubview(descriptionLabel)
-        view.addSubview(logoutButton)
+        [profilePhoto, nameLabel,
+         nicknameLabel, descriptionLabel,
+         logoutButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
     }
     
     private func setupAllConstraints() {

@@ -4,6 +4,7 @@ final class ImagesListViewController: UIViewController {
     
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private let photosName: [String] = Array(0...17).map{ "\($0)" }
+    private let currentDate = Date()
     
     @IBOutlet private weak var tableView: UITableView!
     
@@ -46,7 +47,7 @@ extension ImagesListViewController: UITableViewDataSource {
         }
         
         if let image = UIImage(named: photosName[indexPath.row]) {
-            let date = dateFormatter.string(from: Date())
+            let date = dateFormatter.string(from: currentDate)
             let isLiked = indexPath.row % 2 == 0
             imageListCell.configure(image: image, date: date, isLiked: isLiked)
         }

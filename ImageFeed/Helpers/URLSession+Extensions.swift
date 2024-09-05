@@ -46,25 +46,25 @@ extension URLSession {
         for request: URLRequest,
         completion: @escaping (Result<DecodingType, Error>) -> Void
     ) -> URLSessionTask {
+        let fulfillCompletionOnMainThread: (Result<DecodingType, Error>) -> Void = { result in
+              DispatchQueue.main.async {
+                  completion(result)
+              }
+          }
+        
         let task = data(for: request) { result in
             switch result {
             case .success(let data):
                 do {
                     let decodedObject = try JSONDecoder().decode(DecodingType.self, from: data)
-                    DispatchQueue.main.async {
-                        completion(.success(decodedObject))
-                    }
+                    fulfillCompletionOnMainThread(.success(decodedObject))
                 } catch {
                     print("[objectTask]: DecodingError - \(error.localizedDescription), Data: \(String(data: data, encoding: .utf8) ?? "N/A")")
-                    DispatchQueue.main.async {
-                        completion(.failure(NetworkError.decodingError(error, data)))
-                    }
+                    fulfillCompletionOnMainThread(.failure(NetworkError.decodingError(error, data)))
                 }
             case .failure(let error):
                 print("[objectTask]: NetworkError - \(error.localizedDescription)")
-                DispatchQueue.main.async {
-                    completion(.failure(error))
-                }
+                fulfillCompletionOnMainThread(.failure(error))
             }
         }
         return task

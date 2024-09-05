@@ -29,7 +29,6 @@
 		2AD0773B2A600BB8003F71E6 /* ProgressHUD in Frameworks */ = {isa = PBXBuildFile; productRef = 2AD0773A2A600BB8003F71E6 /* ProgressHUD */; };
 		2AD0773D2A606ABA003F71E6 /* UIBlockingProgressHUD.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD0773C2A606ABA003F71E6 /* UIBlockingProgressHUD.swift */; };
 		2AD077402A608F46003F71E6 /* ProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD0773F2A608F46003F71E6 /* ProfileService.swift */; };
-		2AD13BA02A6889A000DF9C0A /* AuthNav.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD13B9F2A6889A000DF9C0A /* AuthNav.swift */; };
 		2AD385D42A6155B200D3878C /* ProfileResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD385D32A6155B200D3878C /* ProfileResult.swift */; };
 		2AD3DA2C2A470C17005AF6CD /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD3DA2B2A470C17005AF6CD /* Constants.swift */; };
 		2AD3DA2F2A473A54005AF6CD /* AuthViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AD3DA2E2A473A54005AF6CD /* AuthViewController.swift */; };
@@ -60,7 +59,6 @@
 		2A8ED6502A34832F00697A35 /* SingleImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageViewController.swift; sourceTree = "<group>"; };
 		2AD0773C2A606ABA003F71E6 /* UIBlockingProgressHUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIBlockingProgressHUD.swift; sourceTree = "<group>"; };
 		2AD0773F2A608F46003F71E6 /* ProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileService.swift; sourceTree = "<group>"; };
-		2AD13B9F2A6889A000DF9C0A /* AuthNav.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthNav.swift; sourceTree = "<group>"; };
 		2AD385D32A6155B200D3878C /* ProfileResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileResult.swift; sourceTree = "<group>"; };
 		2AD3DA2B2A470C17005AF6CD /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 		2AD3DA2E2A473A54005AF6CD /* AuthViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewController.swift; sourceTree = "<group>"; };
@@ -130,7 +128,6 @@
 				2A7AC0502A58BAC7009C0BD1 /* Helpers */,
 				2A2AEA4E2A1FC263003EA15E /* AppDelegate.swift */,
 				2A2AEA502A1FC263003EA15E /* SceneDelegate.swift */,
-				2AD13B9F2A6889A000DF9C0A /* AuthNav.swift */,
 				2AD3DA2B2A470C17005AF6CD /* Constants.swift */,
 				2A2AEA542A1FC263003EA15E /* Main.storyboard */,
 				2A2AEA572A1FC264003EA15E /* Assets.xcassets */,
@@ -312,7 +309,6 @@
 				2A2AEA512A1FC263003EA15E /* SceneDelegate.swift in Sources */,
 				2A6141B12A62E48100852742 /* ProfileImageService.swift in Sources */,
 				2AD0773D2A606ABA003F71E6 /* UIBlockingProgressHUD.swift in Sources */,
-				2AD13BA02A6889A000DF9C0A /* AuthNav.swift in Sources */,
 				2AD3DA2F2A473A54005AF6CD /* AuthViewController.swift in Sources */,
 				2A7AC0542A58BB01009C0BD1 /* URLRequest+Extensions.swift in Sources */,
 				2A08F9032A4CAB4B007B9E0D /* OAuth2TokenStorage.swift in Sources */,
