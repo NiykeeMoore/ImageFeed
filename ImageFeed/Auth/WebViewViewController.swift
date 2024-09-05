@@ -30,7 +30,7 @@ final class WebViewViewController: UIViewController {
     }
     
     private func makeRequest() {
-        guard var urlComponents = URLComponents(string: "https://unsplash.com/oauth/authorize") else {
+        guard var urlComponents = URLComponents(string: authorizeURLString) else {
             fatalError("Incorrect base URL")
         }
         

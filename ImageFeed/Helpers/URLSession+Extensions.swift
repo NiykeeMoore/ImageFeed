@@ -56,8 +56,10 @@ extension URLSession {
             switch result {
             case .success(let data):
                 do {
-                    let decodedObject = try JSONDecoder().decode(DecodingType.self, from: data)
-                    fulfillCompletionOnMainThread(.success(decodedObject))
+                    let decoder = JSONDecoder()
+                    decoder.keyDecodingStrategy = .convertFromSnakeCase
+                    let result = try decoder.decode(DecodingType.self, from: data)
+                    fulfillCompletionOnMainThread(.success(result))
                 } catch {
                     print("[objectTask]: DecodingError - \(error.localizedDescription), Data: \(String(data: data, encoding: .utf8) ?? "N/A")")
                     fulfillCompletionOnMainThread(.failure(NetworkError.decodingError(error, data)))

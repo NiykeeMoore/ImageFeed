@@ -28,6 +28,10 @@ final class AuthViewController: UIViewController {
             super.prepare(for: segue, sender: sender)
         }
     }
+    
+    @IBAction private func didTapAuthButton(_ sender: Any?) {
+        
+    }
 }
 
 extension AuthViewController: WebViewViewControllerDelegate {
