@@ -10,63 +10,40 @@ enum NetworkError: Error {
 }
 
 extension URLSession {
-    func data(
-        for request: URLRequest,
-        completion: @escaping (Result<Data, Error>) -> Void
-    ) -> URLSessionTask {
-        let fulfillCompletionOnMainThread: (Result<Data, Error>) -> Void = { result in
-            DispatchQueue.main.async {
-                completion(result)
-            }
-        }
-        
-        let task = dataTask(with: request) { data, response, error in
-            if let error = error {
-                print("[data]: URLRequestError - \(error.localizedDescription)")
-                fulfillCompletionOnMainThread(.failure(NetworkError.urlRequestError(error)))
-            } else if let response = response as? HTTPURLResponse,
-                      let data = data {
-                if 200 ..< 300 ~= response.statusCode {
-                    fulfillCompletionOnMainThread(.success(data))
-                } else {
-                    print("[data]: HTTPStatusCodeError - Code: \(response.statusCode)")
-                    fulfillCompletionOnMainThread(.failure(NetworkError.httpStatusCode(response.statusCode)))
-                }
-            } else {
-                let unexpectedError = NSError(domain: "UnexpectedError", code: 0, userInfo: nil)
-                print("[data]: UnexpectedError - Неизвестная ошибка")
-                fulfillCompletionOnMainThread(.failure(NetworkError.urlSessionError(unexpectedError)))
-            }
-        }
-        task.resume()
-        return task
-    }
-    
     func objectTask<DecodingType: Decodable>(
         for request: URLRequest,
         completion: @escaping (Result<DecodingType, Error>) -> Void
     ) -> URLSessionTask {
-        let fulfillCompletionOnMainThread: (Result<DecodingType, Error>) -> Void = { result in
-              DispatchQueue.main.async {
-                  completion(result)
-              }
-          }
-        
-        let task = data(for: request) { result in
-            switch result {
-            case .success(let data):
+        let task = dataTask(with: request) { data, response, error in
+            
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(.failure(NetworkError.urlSessionError(error)))
+                }
+            }
+            
+            if let response = response as? HTTPURLResponse {
+                if !(200..<300 ~= response.statusCode) {
+                    DispatchQueue.main.async {
+                        completion(.failure(NetworkError.httpStatusCode(response.statusCode)))
+                    }
+                }
+            }
+            
+            if let data = data {
                 do {
                     let decoder = JSONDecoder()
                     decoder.keyDecodingStrategy = .convertFromSnakeCase
                     let result = try decoder.decode(DecodingType.self, from: data)
-                    fulfillCompletionOnMainThread(.success(result))
+                    
+                    DispatchQueue.main.async {
+                        completion(.success(result))
+                    }
                 } catch {
-                    print("[objectTask]: DecodingError - \(error.localizedDescription), Data: \(String(data: data, encoding: .utf8) ?? "N/A")")
-                    fulfillCompletionOnMainThread(.failure(NetworkError.decodingError(error, data)))
+                    DispatchQueue.main.async {
+                        completion(.failure(NetworkError.urlSessionError(error)))
+                    }
                 }
-            case .failure(let error):
-                print("[objectTask]: NetworkError - \(error.localizedDescription)")
-                fulfillCompletionOnMainThread(.failure(error))
             }
         }
         return task

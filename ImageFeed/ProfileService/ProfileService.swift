@@ -21,7 +21,7 @@ final class ProfileService {
 
         task?.cancel()
         lastToken = token
-        guard var request = URLRequest.makeHTTPRequest(path: "/me", httpMethod: "GET") else {
+        guard var request = URLRequest.makeHTTPRequest(path: "/me", httpMethod: "GET", baseURL: "\(DefaultBaseURL)") else {
             assertionFailure("Failed to make HTTP request")
             return
         }
