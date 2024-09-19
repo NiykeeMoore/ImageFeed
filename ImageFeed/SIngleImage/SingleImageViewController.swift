@@ -34,10 +34,10 @@ final class SingleImageViewController: UIViewController {
         }
     }
     
-    @IBAction func didTapBackAction(_ sender: UIButton) {
+    @IBAction private func didTapBackAction(_ sender: UIButton) {
         dismiss(animated: true, completion: nil)
     }
-    @IBAction func didTabShareButton(_ sender: UIButton) {
+    @IBAction private func didTabShareButton(_ sender: UIButton) {
         guard let image = self.imageDownload else { return }
         let share = UIActivityViewController(
             activityItems: [image],

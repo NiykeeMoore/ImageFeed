@@ -7,12 +7,11 @@ protocol ImagesListDelegate: AnyObject {
 
 final class ImagesListCell: UITableViewCell {
     static let reuseIdentifier = "ImagesListCell"
-    let cache = ImageCache.default
+    private let cache = ImageCache.default
     weak var delegate: ImagesListDelegate?
-    
-    @IBOutlet weak var likeButton: UIButton!
-    @IBOutlet weak var dateLabel: UILabel!
-    @IBOutlet weak var imageCell: UIImageView!
+    @IBOutlet private weak var likeButton: UIButton!
+    @IBOutlet private weak var dateLabel: UILabel!
+    @IBOutlet private weak var imageCell: UIImageView!
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()

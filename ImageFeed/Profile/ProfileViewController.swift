@@ -6,14 +6,14 @@ final class ProfileViewController: UIViewController {
     private let profileService = ProfileService.shared
     private var profileImageServiceObserver: NSObjectProtocol?
     
-    private let profilePhoto: UIImageView = {
+    private lazy var profilePhoto: UIImageView = {
         let image = UIImage(named: "userPhoto")
         let imageView = UIImageView(image: image)
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
     
-    private let nameLabel: UILabel = {
+    private lazy var nameLabel: UILabel = {
         let label = UILabel()
         label.text = "Екатерина Новикова"
         label.textColor = .ypWhite
@@ -22,7 +22,7 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    private let nicknameLabel: UILabel = {
+    private lazy var nicknameLabel: UILabel = {
         let label = UILabel()
         label.text = "@ekaerina_nov"
         label.textColor = .ypGray
@@ -31,7 +31,7 @@ final class ProfileViewController: UIViewController {
         return label
     }()
     
-    private let descriptionLabel: UILabel = {
+    private lazy var descriptionLabel: UILabel = {
         let label = UILabel()
         label.text = "Hello, world!"
         label.textColor = .ypWhite
