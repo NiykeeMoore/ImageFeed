@@ -5,7 +5,7 @@ protocol ImagesListDelegate: AnyObject {
     func imagesListCellDidTapLike(_ cell: ImagesListCell)
 }
 
-final class ImagesListCell: UITableViewCell {
+public final class ImagesListCell: UITableViewCell {
     static let reuseIdentifier = "ImagesListCell"
     private let cache = ImageCache.default
     weak var delegate: ImagesListDelegate?
@@ -21,9 +21,9 @@ final class ImagesListCell: UITableViewCell {
         return formatter
     }()
     
-    override func prepareForReuse() {
-           imageCell.kf.cancelDownloadTask()
-       }
+    public override func prepareForReuse() {
+        imageCell.kf.cancelDownloadTask()
+    }
     
     func setupCell(from photo: Photo) {
         cache.clearMemoryCache()
