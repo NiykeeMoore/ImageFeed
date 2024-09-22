@@ -7,15 +7,12 @@ protocol AuthViewControllerDelegate: AnyObject {
 final class AuthViewController: UIViewController {
     
     private let segueIdentifier = "ShowWebView"
-    
     weak var delegate: AuthViewControllerDelegate?
     
     @IBOutlet private weak var authButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        navigationController?.navigationBar.barStyle = .black
-
         authButton.layer.cornerRadius = 16
         authButton.layer.masksToBounds = true
     }

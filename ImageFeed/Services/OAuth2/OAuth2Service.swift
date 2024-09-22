@@ -55,7 +55,7 @@ final class OAuth2Service {
 // MARK: - Shared helpers
 private extension OAuth2Service {
     func makeRequest(code: String) -> URLRequest? {
-        guard let url = URL(string: "https://unsplash.com"),
+        guard let url = URL(string: "\(authorizeURLString)"),
               let request = URLRequest.makeHTTPRequest(
                 path: "/oauth/token"
                 + "?client_id=\(AccessKey)"
@@ -64,7 +64,7 @@ private extension OAuth2Service {
                 + "&&code=\(code)"
                 + "&&grant_type=authorization_code",
                 httpMethod: "POST",
-                baseURL: url)
+                baseURL: "\(url)")
         else {
             return nil
         }

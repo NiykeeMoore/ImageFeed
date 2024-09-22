@@ -28,7 +28,7 @@ final class ProfileImageService {
         assert(Thread.isMainThread)
         task?.cancel()
         
-        guard var request = URLRequest.makeHTTPRequest(path: "/users/\(username)", httpMethod: "GET"),
+        guard var request = URLRequest.makeHTTPRequest(path: "/users/\(username)", httpMethod: "GET", baseURL: "\(DefaultBaseURL)"),
               let token = oAuthTokenStorage.token else {
                   print("[fetchProfileImageURL]: RequestError - Ошибка создания запроса для юзера: \(username)")
                   completion(.failure(NSError(domain: "ProfileImageServiceError", code: -1, userInfo: nil)))

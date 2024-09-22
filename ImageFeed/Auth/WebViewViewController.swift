@@ -10,19 +10,14 @@ final class WebViewViewController: UIViewController {
     
     weak var delegate: WebViewViewControllerDelegate?
     private var estimatedProgressObservation: NSKeyValueObservation?
-    
-    @IBOutlet private var webView: WKWebView!
-    @IBOutlet private var progressView: UIProgressView!
+    @IBOutlet private weak var webView: WKWebView!
+    @IBOutlet private weak var progressView: UIProgressView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         self.modalPresentationCapturesStatusBarAppearance = true
-        
         webView.navigationDelegate = self
-        
         makeRequest()
-        
         estimatedProgressObservation = webView.observe(\.estimatedProgress) { [weak self] _, _ in
             guard let self else { return }
             self.updateProgress()
@@ -83,6 +78,18 @@ extension WebViewViewController: WKNavigationDelegate {
             return codeItem.value
         } else {
             return nil
+        }
+    }
+}
+
+// MARK: Clean
+extension WebViewViewController {
+    static func clean() {
+        HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
+        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+            records.forEach { record in
+                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
+            }
         }
     }
 }
