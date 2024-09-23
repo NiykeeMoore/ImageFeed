@@ -22,7 +22,7 @@ final class ProfileService: ProfileServiceProtocol {
 
         task?.cancel()
         lastToken = token
-        guard let request = URLRequest.makeHTTPRequest(path: "/me", httpMethod: "GET", baseURL: String(describing: DefaultBaseURL)) else {
+        guard let request = URLRequest.makeHTTPRequest(path: "/me", httpMethod: "GET", baseURL: String(describing: Constants.defaultBaseURL)) else {
             assertionFailure("Failed to make HTTP request")
             return
         }

@@ -6,11 +6,6 @@ protocol AuthHelperProtocol {
 }
 
 final class AuthHelper: AuthHelperProtocol {
-    let configuration: AuthConfiguration
-    
-    init(configuration: AuthConfiguration = .standard) {
-        self.configuration = configuration
-    }
     
     func authRequest() -> URLRequest {
         let url = authURL()
@@ -18,14 +13,14 @@ final class AuthHelper: AuthHelperProtocol {
     }
     
     func authURL() -> URL {
-        guard var urlComponents = URLComponents(string: authorizeURLString) else {
+        guard var urlComponents = URLComponents(string: Constants.authorizeURLString) else {
             fatalError("Incorrect base URL")
         }
         urlComponents.queryItems = [
-            URLQueryItem(name: "client_id", value: AccessKey),
-            URLQueryItem(name: "redirect_uri", value: RedirectURI),
+            URLQueryItem(name: "client_id", value: Constants.accessKey),
+            URLQueryItem(name: "redirect_uri", value: Constants.redirectURI),
             URLQueryItem(name: "response_type", value: "code"),
-            URLQueryItem(name: "scope", value: AccessScope)
+            URLQueryItem(name: "scope", value: Constants.accessScope)
         ]
         return urlComponents.url!
     }

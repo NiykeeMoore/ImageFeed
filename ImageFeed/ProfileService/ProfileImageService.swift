@@ -7,16 +7,6 @@ protocol ProfileImageServiceProtocol {
 
 final class ProfileImageService: ProfileImageServiceProtocol {
     
-    private struct UserResult: Codable {
-        let profileImage: ProfileImage
-    }
-    
-    private struct ProfileImage: Codable {
-        let small: String
-        let medium: String
-        let large: String
-    }
-    
     static let shared = ProfileImageService()
     static let didChangeNotification = Notification.Name(rawValue: "ProfileImageProviderDidChange")
     private let oAuthTokenStorage = OAuth2TokenStorage()
@@ -32,7 +22,7 @@ final class ProfileImageService: ProfileImageServiceProtocol {
         
         guard let request = URLRequest.makeHTTPRequest(path: "/users/\(username)",
                                                        httpMethod: "GET",
-                                                       baseURL: String(describing: DefaultBaseURL)) else {
+                                                       baseURL: String(describing: Constants.defaultBaseURL)) else {
             assertionFailure("Failed to make HTTP request")
             return
         }

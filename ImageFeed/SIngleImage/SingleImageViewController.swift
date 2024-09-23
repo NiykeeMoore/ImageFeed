@@ -4,7 +4,7 @@ final class SingleImageViewController: UIViewController {
     
     var image: URL?
     private var imageDownload: UIImage?
-    
+    private lazy var alertPresenter = AlertPresenter()
     @IBOutlet private weak var imageView: UIImageView!
     @IBOutlet private weak var scrollView: UIScrollView!
     
@@ -14,6 +14,7 @@ final class SingleImageViewController: UIViewController {
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
         loadAndShowImage(url: image)
+        alertPresenter.delegate = self
     }
 
 // MARK: Load and show image
@@ -110,22 +111,28 @@ extension SingleImageViewController: UIScrollViewDelegate {
 }
 
 // MARK: Show error
-extension SingleImageViewController {
+extension SingleImageViewController: AlertPresenterDelegate {
+    func sendAlert(alert: UIAlertController) {
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     private func showError(url: URL) {
-        let alert = UIAlertController(title: "Что-то пошло не так.", message: "Попробовать ещё раз?", preferredStyle: .alert)
-        let repeats = UIAlertAction(title: "Повторить", style: .default) { [weak self] _ in
+        let repeats = AlertButtonModel(title: "Повторить", style: .default) { [weak self] _ in
             guard let self else { return }
             self.loadAndShowImage(url: url)
         }
         
-        let cancel = UIAlertAction(title: "Не надо", style: .cancel) { _ in
-            alert.dismiss(animated: true)
+        let cancel = AlertButtonModel(title: "Не надо", style: .cancel) { _ in
+            self.dismiss(animated: true)
         }
         
-        alert.addAction(cancel)
-        alert.addAction(repeats)
+        let alert = AlertModel(title: "Что-то пошло не так.",
+                               message: "Попробовать ещё раз?",
+                               preferredStyle: .alert,
+                               primaryButton: repeats,
+                               secondaryButton: cancel)
         
-        present(alert, animated: true)
+        alertPresenter.alertPresent(alertModel: alert)
     }
 }
 

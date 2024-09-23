@@ -55,18 +55,17 @@ final class ImagesListPresenter: ImagesListPresenterProtocol {
     
     func imageListCellDidTapLike(_ index: Int, _ cell: ImagesListCell) {
         guard let photo = getPhotoIndex(index) else { return }
-        UIBlockingProgressHUD.showWA()
+        view?.showLoadingIndicator()
         imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success:
                 self.photos = self.imagesListService.photos
                 cell.setIsLiked(isLiked: self.photos[index].isLiked)
-                UIBlockingProgressHUD.dismissWA()
             case .failure(let error):
                 print(error.localizedDescription)
-                UIBlockingProgressHUD.dismissWA()
             }
+            view?.hideLoadingIndicator()
         }
     }
     

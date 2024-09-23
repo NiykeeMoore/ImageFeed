@@ -2,7 +2,7 @@
 import XCTest
 
 final class ImageFeedUITests: XCTestCase {
-
+    
     private let app = XCUIApplication()
     
     override func setUpWithError() throws {
@@ -11,11 +11,24 @@ final class ImageFeedUITests: XCTestCase {
     }
     
     func testAuth() throws {
+        /*
+         В некоторых случаях при повторном запуске может вылететь приложение
+         Особенно если меняются ключи api
+         Ищем уведомление и нажимаем ОК, чтобы пройти дальше
+         */
+        let alert = app.alerts.firstMatch
+        if alert.waitForExistence(timeout: 3) {
+            let button = alert.buttons["OK"]
+            button.tap()
+        }
+        
+        sleep(2)
+        
         app.buttons["AuthenticateButton"].tap()
-
+        
         let webView = app.webViews["UnsplashWebView"]
         XCTAssertTrue(webView.waitForExistence(timeout: 5))
-
+        
         let loginTextField = webView.descendants(matching: .textField).element
         XCTAssertTrue(loginTextField.waitForExistence(timeout: 5))
         
@@ -47,10 +60,10 @@ final class ImageFeedUITests: XCTestCase {
         
         let cell = tableQuery.children(matching: .cell).element(boundBy: 0)
         cell.swipeUp()
-        
         sleep(2)
+        cell.swipeDown() // в тз есть данные про свайп вверх, но ничего нет про свайп вниз :)
         
-        let cellToLike = tableQuery.children(matching: .cell).element(boundBy: 1)
+        let cellToLike = tableQuery.children(matching: .cell).element(boundBy: 0)
         cellToLike.buttons["likeOff"].tap()
         cellToLike.buttons["likeOn"].tap()
         

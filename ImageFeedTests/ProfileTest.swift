@@ -5,13 +5,11 @@ final class ProfileTests: XCTestCase {
     
     private struct ProfileServiceStub: ProfileServiceProtocol {
         var profile: ImageFeed.ProfileResult? = ProfileResult(username: "test", firstName: "test", lastName: "test", bio: "test")
-        
         func fetchProfile(_ token: String, completion: @escaping (Result<ImageFeed.ProfileResult, Error>) -> Void) {}
     }
     
     private struct ProfileImageServiceStub: ProfileImageServiceProtocol {
         var avatarURL: String? = "https://api.unsplash.com"
-        
         func fetchProfileImageURL(_ username: String, completion: @escaping (Result<String, Error>) -> Void) {}
     }
     
@@ -51,7 +49,6 @@ final class ProfileTests: XCTestCase {
 // MARK: Spy Objects
 final class ProfileViewPresentSpy: ProfileViewPresenterProtocol {
     var view: ImageFeed.ProfileViewControllerProtocol?
-    
     var updateAvatarCalled = false
     var updateProfileDetailsCalled = false
     
@@ -63,9 +60,8 @@ final class ProfileViewPresentSpy: ProfileViewPresenterProtocol {
         updateAvatarCalled = true
     }
     
-    func observerProfileImageService() {
-    }
-  
+    func observerProfileImageService() { }
+    
 }
 
 final class ProfileViewControllerSpy: ProfileViewControllerProtocol {

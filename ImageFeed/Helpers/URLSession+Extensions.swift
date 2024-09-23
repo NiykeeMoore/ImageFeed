@@ -14,19 +14,21 @@ extension URLSession {
         for request: URLRequest,
         completion: @escaping (Result<DecodingType, Error>) -> Void
     ) -> URLSessionTask {
+        let fulfillCompletionOnTheMainThread: (Result<DecodingType, Error>) -> Void = { result in
+            DispatchQueue.main.async {
+                completion(result)
+            }
+        }
+        
         let task = dataTask(with: request) { data, response, error in
             
             if let error = error {
-                DispatchQueue.main.async {
-                    completion(.failure(NetworkError.urlSessionError(error)))
-                }
+                fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError(error)))
             }
             
             if let response = response as? HTTPURLResponse {
                 if !(200..<300 ~= response.statusCode) {
-                    DispatchQueue.main.async {
-                        completion(.failure(NetworkError.httpStatusCode(response.statusCode)))
-                    }
+                    fulfillCompletionOnTheMainThread(.failure(NetworkError.httpStatusCode(response.statusCode)))
                 }
             }
             
@@ -35,14 +37,10 @@ extension URLSession {
                     let decoder = JSONDecoder()
                     decoder.keyDecodingStrategy = .convertFromSnakeCase
                     let result = try decoder.decode(DecodingType.self, from: data)
+                    fulfillCompletionOnTheMainThread(.success(result))
                     
-                    DispatchQueue.main.async {
-                        completion(.success(result))
-                    }
                 } catch {
-                    DispatchQueue.main.async {
-                        completion(.failure(NetworkError.urlSessionError(error)))
-                    }
+                    fulfillCompletionOnTheMainThread(.failure(NetworkError.urlSessionError(error)))
                 }
             }
         }

@@ -3,6 +3,8 @@ import UIKit
 protocol ImagesListViewControllerProtocol: AnyObject {
     var presenter: ImagesListPresenterProtocol? { get set }
     func updateTableViewAnimated(oldCount: Int, newCount: Int)
+    func showLoadingIndicator()
+    func hideLoadingIndicator()
 }
 
 final class ImagesListViewController: UIViewController, ImagesListViewControllerProtocol {
@@ -43,6 +45,14 @@ final class ImagesListViewController: UIViewController, ImagesListViewController
             tableView.insertRows(at: indexPaths, with: .automatic)
         } completion: { _ in }
         
+    }
+    
+    func showLoadingIndicator() {
+        UIBlockingProgressHUD.showWA()
+    }
+    
+    func hideLoadingIndicator() {
+        UIBlockingProgressHUD.dismissWA()
     }
     
     // MARK: Table View

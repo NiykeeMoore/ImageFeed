@@ -21,11 +21,11 @@ final class ImageListTests: XCTestCase {
         let view = ImageListViewControllerSpy()
         let presenter = ImagesListPresenter(imagesListService: ImageListServiceTestModel)
         presenter.view = view
-
+        
         // when
         ImageListServiceTestModel.fetchPhotosNextPage()
         presenter.updateTableView()
-
+        
         // then
         XCTAssertTrue(view.updateTableViewAnimatedCalled == true)
     }
@@ -36,32 +36,30 @@ final class ImageListTests: XCTestCase {
         let view = ImageListViewControllerSpy()
         let presenter = ImagesListPresenter(imagesListService: ImageListServiceTestModel)
         presenter.view = view
-
+        
         // when
         ImageListServiceTestModel.fetchPhotosNextPage()
         presenter.updateTableView()
         presenter.willDisplay(0)
-
+        
         // then
         XCTAssertEqual(ImageListServiceTestModel.photos.count, 2)
     }
 }
 
-// MARK: Image List Service Test Model
-private let dateFormatter = ISO8601DateFormatter()
-private let photo = Photo(PhotoResult(id: "test",
-                                      width: 100,
-                                      height: 100,
-                                      createdAt: "2022-10-12T01:11:34",
-                                      description: "test",
-                                      urls: UrlsResult(full: "test",
-                                                       regular: "test",
-                                                       small: "test",
-                                                       thumb: "test"),
-                                      likedByUser: false),
-                                      date: dateFormatter)
-
 private final class ImageListServiceTestModel: ImagesListServiceProtocol {
+    // MARK: Image List Service Test Model
+    private let photo = Photo(PhotoResult(id: "test",
+                                          width: 100,
+                                          height: 100,
+                                          createdAt: "2022-10-12T01:11:34",
+                                          description: "test",
+                                          urls: UrlsResult(full: "test",
+                                                           regular: "test",
+                                                           small: "test",
+                                                           thumb: "test"),
+                                          likedByUser: false),
+                              date: ISO8601DateFormatter())
     var photos: [ImageFeed.Photo] = []
     func fetchPhotosNextPage() { photos.append(photo) }
     func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {}
@@ -101,6 +99,9 @@ final class ImageListPresenterSpy: ImagesListPresenterProtocol {
 }
 
 final class ImageListViewControllerSpy : ImagesListViewControllerProtocol {
+    func showLoadingIndicator() { }
+    func hideLoadingIndicator() { }
+    
     var presenter: ImageFeed.ImagesListPresenterProtocol?
     var updateTableViewAnimatedCalled = false
     

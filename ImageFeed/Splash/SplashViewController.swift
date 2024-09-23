@@ -1,7 +1,7 @@
 import UIKit
 import ProgressHUD
 
-final class SplashViewController: UIViewController {
+final class SplashViewController: UIViewController, AlertPresenterDelegate {
     
     private let oauth2Service = OAuth2Service.shared
     private let oauth2TokenStorage = OAuth2TokenStorage()
@@ -18,11 +18,12 @@ final class SplashViewController: UIViewController {
         view.backgroundColor = .ypBlack
         setupViews()
         setupAllConstraints()
+        alertPresenter.delegate = self
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-
+        
         if let token = oauth2TokenStorage.token {
             fetchProfile(token: token)
         } else {
@@ -40,7 +41,7 @@ final class SplashViewController: UIViewController {
             splashImage.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
-
+    
     private func switchToTabBarController() {
         guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
         let tabBarController = UIStoryboard(name: "Main", bundle: .main)
@@ -57,18 +58,25 @@ final class SplashViewController: UIViewController {
         present(authViewController, animated: true)
     }
     
+    func sendAlert(alert: UIAlertController) {
+        self.present(alert, animated: true, completion: nil)
+    }
+    
+    private lazy var alertPresenter = AlertPresenter()
+    
     private func showAlert() {
-        let alert = UIAlertController(
-            title: "Что-то пошло не так",
-            message: "Не удалось войти в систему",
-            preferredStyle: .alert
-        )
-        let action = UIAlertAction(title: "Ок", style: .cancel) { [weak self] _ in
+        let action = AlertButtonModel(title: "OK", style: .cancel) { [weak self] _ in
             guard let self else { return }
             switchToAuthViewController()
         }
-        alert.addAction(action)
-        present(alert, animated: true)
+        
+        let alert = AlertModel(title: "Что-то пошло не так.",
+                               message: "Не удалось войти в систему",
+                               preferredStyle: .alert,
+                               primaryButton: action,
+                               secondaryButton: nil)
+        
+        alertPresenter.alertPresent(alertModel: alert)
     }
 }
 

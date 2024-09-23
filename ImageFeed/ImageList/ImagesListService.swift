@@ -16,6 +16,8 @@ final class ImagesListService: ImagesListServiceProtocol {
     private var currentTask: URLSessionTask?
     private let dateFormatter = ISO8601DateFormatter()
     
+    private init() {}
+    
     // MARK: Response Photo Next Page
     func fetchPhotosNextPage() {
         assert(Thread.isMainThread)
@@ -98,12 +100,12 @@ final class ImagesListService: ImagesListServiceProtocol {
         return URLRequest.makeHTTPRequest(path: "/photos",
                                           httpMethod: "GET",
                                           queryItems: queryItems,
-                                          baseURL: String(describing: DefaultBaseURL))
+                                          baseURL: String(describing: Constants.defaultBaseURL))
     }
     
     private func makeLikeRequest(photoId: String, isLike: Bool) -> URLRequest? {
         URLRequest.makeHTTPRequest(path: "/photos/\(photoId)/like",
                                    httpMethod: isLike ? "POST" : "DELETE",
-                                   baseURL: String(describing: DefaultBaseURL))
+                                   baseURL: String(describing: Constants.defaultBaseURL))
     }
 }

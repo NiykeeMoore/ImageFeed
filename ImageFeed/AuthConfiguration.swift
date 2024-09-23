@@ -1,35 +1,19 @@
 import Foundation
+/*
+ Если апишка превышена, подставить другие данные чтоб не ждать кулдауна
+ static let accessKey = "YY_3VaSwj3Nc40rzgGRkT6lskWXQwf41jWouLeOq1mc" // первый акк
+ static let secretKey = "onZ7lEXc1mrwN2yZ6vTWXO2r1SMBrt3L2pGdP_uCzek" // первый акк
+ 
+ static let accessKey = "45l6mwJ-T8m-CKm-oXNOnC9qiwZ4n_yt1YPr58Fh4H8" // второй акк
+ static let secretKey = "mRO43z5gFTB5c8mUa10maCYC07vmQjljEIpS0qbuVl0" // второй акк
+ */
 
-let DefaultBaseURL = "https://api.unsplash.com"
-let authorizeURLString = "https://unsplash.com/oauth/authorize"
-let AccessKey = "YY_3VaSwj3Nc40rzgGRkT6lskWXQwf41jWouLeOq1mc"
-let SecretKey = "onZ7lEXc1mrwN2yZ6vTWXO2r1SMBrt3L2pGdP_uCzek"
-let RedirectURI = "urn:ietf:wg:oauth:2.0:oob"
-let AccessScope = "public+read_user+write_likes"
-
-struct AuthConfiguration {
-    let access_Key: String
-    let secret_Key: String
-    let redirect_URI: String
-    let access_Scope: String
-    let default_Base_URL: String
-    let authorize_URL_String: String
+enum Constants {
+    static let defaultBaseURL = "https://api.unsplash.com"
+    static let authorizeURLString = "https://unsplash.com/oauth/authorize"
+    static let accessKey = "YY_3VaSwj3Nc40rzgGRkT6lskWXQwf41jWouLeOq1mc" // первый акк
+    static let secretKey = "onZ7lEXc1mrwN2yZ6vTWXO2r1SMBrt3L2pGdP_uCzek" // первый акк
+    static let redirectURI = "urn:ietf:wg:oauth:2.0:oob"
+    static let accessScope = "public+read_user+write_likes"
     
-    static var standard: AuthConfiguration {
-        return AuthConfiguration(accessKey: AccessKey,
-                                 secretKey: SecretKey,
-                                 redirectURI: RedirectURI,
-                                 accessScope: AccessScope,
-                                 authorizeURLString: authorizeURLString,
-                                 defaultBaseURL: DefaultBaseURL)
-    }
-    
-    init(accessKey: String, secretKey: String, redirectURI: String, accessScope: String, authorizeURLString: String, defaultBaseURL: String) {
-        self.access_Key = accessKey
-        self.secret_Key = secretKey
-        self.redirect_URI = redirectURI
-        self.access_Scope = accessScope
-        self.default_Base_URL = defaultBaseURL
-        self.authorize_URL_String = authorizeURLString
-    }
 }

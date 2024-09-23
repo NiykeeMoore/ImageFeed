@@ -50,7 +50,7 @@ public final class ImagesListCell: UITableViewCell {
         likeButton.setImage(likeImage, for: .normal)
     }
     
-    static func clean() {
+    func clean() {
         let cache = ImageCache.default
         cache.clearMemoryCache()
         cache.clearDiskCache()

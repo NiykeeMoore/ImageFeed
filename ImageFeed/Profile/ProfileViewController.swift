@@ -7,7 +7,7 @@ public protocol ProfileViewControllerProtocol: AnyObject {
     func setupAvatar(url: URL)
 }
 
-final class ProfileViewController: UIViewController, ProfileViewControllerProtocol {
+final class ProfileViewController: UIViewController, ProfileViewControllerProtocol, AlertPresenterDelegate {
     
     private lazy var avatarPlaceHolder = UIImage(named: "placeholder")
     private let profileService = ProfileService.shared
@@ -15,7 +15,6 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
     private lazy var profilePhoto: UIImageView = {
         let image = UIImage(named: "placeholder")
         let imageView = UIImageView(image: image)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFill
         imageView.clipsToBounds = true // Для скругления углов
         return imageView
@@ -26,7 +25,6 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
         label.text = "Екатерина Новикова"
         label.textColor = .ypWhite
         label.font = UIFont.systemFont(ofSize: 23, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.accessibilityIdentifier = "nameLabel"
         return label
     }()
@@ -36,7 +34,6 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
         label.text = "@ekaerina_nov"
         label.textColor = .ypGray
         label.font = UIFont.systemFont(ofSize: 13)
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.accessibilityIdentifier = "nicknameLabel"
         return label
     }()
@@ -46,7 +43,6 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
         label.text = "Hello, world!"
         label.textColor = .ypWhite
         label.font = UIFont.systemFont(ofSize: 13)
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
         return label
     }()
@@ -59,7 +55,6 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
         let button = UIButton()
         let image = UIImage(named: "ipad.and.arrow.forward")
         button.setImage(image, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
         button.accessibilityIdentifier = "logout"
         return button
@@ -73,6 +68,7 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
         presenter?.view = self
         presenter?.updateProfileDetails()
         presenter?.observerProfileImageService()
+        alertPresenter.delegate = self
     }
     
     override func viewDidLayoutSubviews() {
@@ -123,11 +119,14 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
     }
     
     private func setupViews() {
-        view.addSubview(profilePhoto)
-        view.addSubview(nameLabel)
-        view.addSubview(nicknameLabel)
-        view.addSubview(descriptionLabel)
-        view.addSubview(logoutButton)
+        [profilePhoto,
+         nameLabel,
+         nicknameLabel,
+         descriptionLabel,
+         logoutButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
     }
     
     private func setupAllConstraints() {
@@ -154,14 +153,19 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
         ])
     }
     
+    private lazy var alertPresenter = AlertPresenter()
+    
+    func sendAlert(alert: UIAlertController) {
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     @objc
     private func didTapLogoutButton() {
-        let alert = UIAlertController(title: "Пока, пока!", message: "Уверены что хотите выйти?", preferredStyle: .alert)
-        
-        let yesAction = UIAlertAction(title: "Да", style: .default) { _ in
+        let imagesListCell = ImagesListCell()
+        let yesAction = AlertButtonModel(title: "Да", style: .default) { _ in
             OAuth2TokenStorage.shared.clean()
             WebViewViewController.clean()
-            ImagesListCell.clean()
+            imagesListCell.clean()
             
             guard let window = UIApplication.shared.windows.first else {
                 fatalError("invalid configuration")
@@ -169,13 +173,17 @@ final class ProfileViewController: UIViewController, ProfileViewControllerProtoc
             window.rootViewController = SplashViewController()
             window.makeKeyAndVisible()
         }
-        
-        let noAction = UIAlertAction(title: "Нет", style: .default) { _ in
-            alert.dismiss(animated: true)
+        let noAction = AlertButtonModel(title: "Нет", style: .default) { _ in
+            self.dismiss(animated: true)
         }
-        alert.addAction(yesAction)
-        alert.addAction(noAction)
-        present(alert, animated: true)
+        
+        let alert = AlertModel(title: "Пока, пока!",
+                               message: "Уверены что хотите выйти?",
+                               preferredStyle: .alert,
+                               primaryButton: yesAction,
+                               secondaryButton: noAction)
+        
+        alertPresenter.alertPresent(alertModel: alert)
     }
 }
 

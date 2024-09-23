@@ -9,14 +9,3 @@ struct PhotoResult: Decodable {
     let urls: UrlsResult
     let likedByUser: Bool
 }
-
-struct UrlsResult: Decodable {
-    let full: String
-    let regular: String
-    let small: String
-    let thumb: String
-}
-
-struct PhotoLike: Decodable {
-    let photo: PhotoResult
-}
