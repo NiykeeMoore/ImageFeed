@@ -1,6 +1,11 @@
 import Foundation
 
-final class ProfileService {
+protocol ProfileServiceProtocol {
+    var profile: ProfileResult? { get }
+    func fetchProfile(_ token: String, completion: @escaping (Result<ProfileResult, Error>) -> Void)
+}
+
+final class ProfileService: ProfileServiceProtocol {
     
     static let shared = ProfileService()
     
@@ -9,11 +14,7 @@ final class ProfileService {
     private var task: URLSessionTask?
     private var lastToken: String?
     
-    private init(profile: ProfileResult? = nil, task: URLSessionTask? = nil, lastToken: String? = nil) {
-        self.profile = profile
-        self.task = task
-        self.lastToken = lastToken
-    }
+    private init() {}
     
     func fetchProfile(_ token: String, completion: @escaping (Result<ProfileResult, Error>) -> Void) {
         assert(Thread.isMainThread)
@@ -21,11 +22,10 @@ final class ProfileService {
 
         task?.cancel()
         lastToken = token
-        guard var request = URLRequest.makeHTTPRequest(path: "/me", httpMethod: "GET", baseURL: "\(DefaultBaseURL)") else {
+        guard let request = URLRequest.makeHTTPRequest(path: "/me", httpMethod: "GET", baseURL: String(describing: Constants.defaultBaseURL)) else {
             assertionFailure("Failed to make HTTP request")
             return
         }
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         let task = urlSession.objectTask(for: request) { [weak self] (result: Result<ProfileResult, Error>) in
             guard let self else { return }
             switch result {

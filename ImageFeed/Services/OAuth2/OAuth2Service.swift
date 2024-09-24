@@ -55,12 +55,12 @@ final class OAuth2Service {
 // MARK: - Shared helpers
 private extension OAuth2Service {
     func makeRequest(code: String) -> URLRequest? {
-        guard let url = URL(string: "\(authorizeURLString)"),
+        guard let url = URL(string: "\(Constants.authorizeURLString)"),
               let request = URLRequest.makeHTTPRequest(
                 path: "/oauth/token"
-                + "?client_id=\(AccessKey)"
-                + "&&client_secret=\(SecretKey)"
-                + "&&redirect_uri=\(RedirectURI)"
+                + "?client_id=\(Constants.accessKey)"
+                + "&&client_secret=\(Constants.secretKey)"
+                + "&&redirect_uri=\(Constants.redirectURI)"
                 + "&&code=\(code)"
                 + "&&grant_type=authorization_code",
                 httpMethod: "POST",

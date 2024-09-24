@@ -1,15 +1,22 @@
 import UIKit
 import Kingfisher
 
-final class ProfileViewController: UIViewController {
+public protocol ProfileViewControllerProtocol: AnyObject {
+    var presenter: ProfileViewPresenterProtocol? { get set }
+    func setupProfileDetails(name: String, login: String, bio: String)
+    func setupAvatar(url: URL)
+}
+
+final class ProfileViewController: UIViewController, ProfileViewControllerProtocol, AlertPresenterDelegate {
     
+    private lazy var avatarPlaceHolder = UIImage(named: "placeholder")
     private let profileService = ProfileService.shared
-    private var profileImageServiceObserver: NSObjectProtocol?
     
     private lazy var profilePhoto: UIImageView = {
-        let image = UIImage(named: "userPhoto")
+        let image = UIImage(named: "placeholder")
         let imageView = UIImageView(image: image)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFill
+        imageView.clipsToBounds = true // Для скругления углов
         return imageView
     }()
     
@@ -18,7 +25,7 @@ final class ProfileViewController: UIViewController {
         label.text = "Екатерина Новикова"
         label.textColor = .ypWhite
         label.font = UIFont.systemFont(ofSize: 23, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.accessibilityIdentifier = "nameLabel"
         return label
     }()
     
@@ -27,7 +34,7 @@ final class ProfileViewController: UIViewController {
         label.text = "@ekaerina_nov"
         label.textColor = .ypGray
         label.font = UIFont.systemFont(ofSize: 13)
-        label.translatesAutoresizingMaskIntoConstraints = false
+        label.accessibilityIdentifier = "nicknameLabel"
         return label
     }()
     
@@ -36,17 +43,20 @@ final class ProfileViewController: UIViewController {
         label.text = "Hello, world!"
         label.textColor = .ypWhite
         label.font = UIFont.systemFont(ofSize: 13)
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.numberOfLines = 0
         return label
+    }()
+    
+    var presenter: ProfileViewPresenterProtocol? = {
+        return ProfileViewPresenter()
     }()
     
     private lazy var logoutButton: UIButton = {
         let button = UIButton()
         let image = UIImage(named: "ipad.and.arrow.forward")
         button.setImage(image, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
+        button.accessibilityIdentifier = "logout"
         return button
     }()
     
@@ -55,40 +65,68 @@ final class ProfileViewController: UIViewController {
         view.backgroundColor = .ypBlack
         setupViews()
         setupAllConstraints()
-        updateProfileDetails()
-        observerProfileImageService()
+        presenter?.view = self
+        presenter?.updateProfileDetails()
+        presenter?.observerProfileImageService()
+        alertPresenter.delegate = self
     }
     
-    private func updateAvatar() {
-        guard let profileImageURL = ProfileImageService.shared.avatarURL,
-              let url = URL(string: profileImageURL) else { return }
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        applyGradients()
+    }
+    
+    private func applyGradients() {
         
+        let profilePhotoColors = [UIColor.ypGray, UIColor.ypWhite]
+        let nameLabelColors = [UIColor.ypGray, UIColor.ypWhite]
+        let nicknameLabelColors = [UIColor.ypGray, UIColor.ypWhite]
+        let descriptionLabelColors = [UIColor.ypGray, UIColor.ypWhite]
+        
+        profilePhoto.applyGradient(colors: profilePhotoColors, cornerRadius: 35)
+        nameLabel.applyGradient(colors: nameLabelColors, cornerRadius: 10)
+        nicknameLabel.applyGradient(colors: nicknameLabelColors, cornerRadius: 5)
+        descriptionLabel.applyGradient(colors: descriptionLabelColors, cornerRadius: 5)
+    }
+    
+    func setupProfileDetails(name: String, login: String, bio: String) {
+        nameLabel.text = name
+        nicknameLabel.text = login
+        descriptionLabel.text = bio
+    }
+    
+    func setupAvatar(url: URL) {
         let cache = ImageCache.default
         cache.clearDiskCache()
-        let processor = RoundCornerImageProcessor(cornerRadius: 42)
+        cache.clearMemoryCache()
+        let processor = RoundCornerImageProcessor(cornerRadius: 35) // Половина размера (70/2)
         
-        profilePhoto.kf.setImage(with: url,
-                                 placeholder: UIImage(named: "placeholder"),
-                                 options: [.processor(processor), .transition(.fade(1))])
+        profilePhoto.kf.setImage(with: url, placeholder: avatarPlaceHolder, options: [.processor(processor), .transition(.fade(1))]) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let image):
+                self.profilePhoto.image = image.image
+                self.removeGradients()
+            case .failure(let error):
+                print("[setupAvatar]: ошибка настройки аватара \(error)")
+            }
+        }
     }
     
-    private func observerProfileImageService() {
-        profileImageServiceObserver = NotificationCenter.default.addObserver(
-            forName: ProfileImageService.didChangeNotification,
-            object: nil,
-            queue: .main) { [weak self] _ in
-                guard let self else { return }
-                updateAvatar()
-            }
-        updateAvatar()
+    private func removeGradients() {
+        let viewsToRemoveGradients: [UIView] = [profilePhoto, nameLabel, nicknameLabel, descriptionLabel, logoutButton]
+        viewsToRemoveGradients.forEach { $0.removeGradient() }
     }
     
     private func setupViews() {
-        view.addSubview(profilePhoto)
-        view.addSubview(nameLabel)
-        view.addSubview(nicknameLabel)
-        view.addSubview(descriptionLabel)
-        view.addSubview(logoutButton)
+        [profilePhoto,
+         nameLabel,
+         nicknameLabel,
+         descriptionLabel,
+         logoutButton].forEach {
+            $0.translatesAutoresizingMaskIntoConstraints = false
+            view.addSubview($0)
+        }
     }
     
     private func setupAllConstraints() {
@@ -100,9 +138,11 @@ final class ProfileViewController: UIViewController {
             
             nameLabel.topAnchor.constraint(equalTo: profilePhoto.bottomAnchor, constant: 8),
             nameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nameLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16), // Для корректного отображения градиента
             
             nicknameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
             nicknameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            nicknameLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16), // Для корректного отображения градиента
             
             descriptionLabel.topAnchor.constraint(equalTo: nicknameLabel.bottomAnchor, constant: 8),
             descriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
@@ -113,14 +153,19 @@ final class ProfileViewController: UIViewController {
         ])
     }
     
+    private lazy var alertPresenter = AlertPresenter()
+    
+    func sendAlert(alert: UIAlertController) {
+        self.present(alert, animated: true, completion: nil)
+    }
+    
     @objc
     private func didTapLogoutButton() {
-        let alert = UIAlertController(title: "Пока, пока!", message: "Уверены что хотите выйти?", preferredStyle: .alert)
-        
-        let yesAction = UIAlertAction(title: "Да", style: .default) { _ in
+        let imagesListCell = ImagesListCell()
+        let yesAction = AlertButtonModel(title: "Да", style: .default) { _ in
             OAuth2TokenStorage.shared.clean()
             WebViewViewController.clean()
-            ImagesListCell.clean()
+            imagesListCell.clean()
             
             guard let window = UIApplication.shared.windows.first else {
                 fatalError("invalid configuration")
@@ -128,20 +173,17 @@ final class ProfileViewController: UIViewController {
             window.rootViewController = SplashViewController()
             window.makeKeyAndVisible()
         }
-        
-        let noAction = UIAlertAction(title: "Нет", style: .default) { _ in
-            alert.dismiss(animated: true)
+        let noAction = AlertButtonModel(title: "Нет", style: .default) { _ in
+            self.dismiss(animated: true)
         }
-        alert.addAction(yesAction)
-        alert.addAction(noAction)
-        present(alert, animated: true)
-    }
-}
-
-// MARK: - Status Bar Style
-extension ProfileViewController {
-    override var preferredStatusBarStyle: UIStatusBarStyle {
-        return .lightContent
+        
+        let alert = AlertModel(title: "Пока, пока!",
+                               message: "Уверены что хотите выйти?",
+                               preferredStyle: .alert,
+                               primaryButton: yesAction,
+                               secondaryButton: noAction)
+        
+        alertPresenter.alertPresent(alertModel: alert)
     }
 }
 
@@ -152,5 +194,38 @@ private extension ProfileViewController {
         nameLabel.text = "\(profile.firstName) \(profile.lastName ?? "")"
         nicknameLabel.text = "@\(profile.username)"
         descriptionLabel.text = profile.bio
+    }
+}
+
+// MARK: - Status Bar Style
+extension ProfileViewController {
+    override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+}
+
+// MARK: - Profile Gradient Style
+extension UIView {
+    
+    func applyGradient(
+        colors: [UIColor],
+        startPoint: CGPoint = CGPoint(x: 0, y: 0),
+        endPoint: CGPoint = CGPoint(x: 1, y: 1),
+        cornerRadius: CGFloat = 0
+    ) {
+        self.layer.sublayers?.filter { $0 is CAGradientLayer }.forEach { $0.removeFromSuperlayer() }
+        
+        let gradient = CAGradientLayer()
+        gradient.colors = colors.map { $0.cgColor }
+        gradient.startPoint = startPoint
+        gradient.endPoint = endPoint
+        gradient.cornerRadius = cornerRadius
+        gradient.frame = self.bounds
+        
+        self.layer.insertSublayer(gradient, at: 0)
+    }
+    
+    func removeGradient() {
+        self.layer.sublayers?.filter { $0 is CAGradientLayer }.forEach { $0.removeFromSuperlayer() }
     }
 }

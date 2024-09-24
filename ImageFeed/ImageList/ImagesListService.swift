@@ -1,69 +1,63 @@
 import Foundation
 
-final class ImagesListService {
+protocol ImagesListServiceProtocol {
+    var photos: [Photo] { get }
+    func fetchPhotosNextPage()
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void)
+}
+
+final class ImagesListService: ImagesListServiceProtocol {
+    
     static let shared = ImagesListService()
-    private let tokenStorage = OAuth2TokenStorage()
-    var photos: [Photo] = []
-    private var task: URLSessionTask?
-    private let urlSession = URLSession.shared
+    static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
+    private(set) var photos: [Photo] = []
     private var lastLoadedPage: Int?
+    private let urlSession = URLSession.shared
+    private var currentTask: URLSessionTask?
     private let dateFormatter = ISO8601DateFormatter()
-    init() {}
     
-    private func makeImagesListRequest(page: Int) -> URLRequest? {
-        let per_page = 10
-        let queryItems = [
-            URLQueryItem(name: "page", value: "\(page)"),
-            URLQueryItem(name: "per_page", value: "\(per_page)")
-        ]
-        
-        guard let url = URLRequest.makeHTTPRequest(path: "/photos?",
-                                                   httpMethod: "GET",
-                                                   queryItems: queryItems,
-                                                   baseURL: "\(DefaultBaseURL)") else {
-            assertionFailure("url dead")
-            return nil
-        }
-        return url
-    }
+    private init() {}
     
+    // MARK: Response Photo Next Page
     func fetchPhotosNextPage() {
-        if let task = task, task.state == .running {
-            return
-        }
+        assert(Thread.isMainThread)
+        guard currentTask == nil else { return }
         let nextPage = (lastLoadedPage ?? 0) + 1
-        guard let request = makeImagesListRequest(page: nextPage) else {
-            assertionFailure("ошибка создания запроса")
+        guard let request = makeRequest(page: nextPage) else {
+            print("Ошибка создания запроса")
             return
         }
-        
         let task = urlSession.objectTask(for: request) { [weak self] (result: Result<[PhotoResult], Error>) in
             guard let self else { return }
             DispatchQueue.main.async {
                 switch result {
                 case .success(let photoResults):
-                    let newPhotos = photoResults.map {
-                        Photo($0, date: self.dateFormatter)
+                    if self.lastLoadedPage == nil {
+                        self.lastLoadedPage = 1
+                    } else {
+                        self.lastLoadedPage! += 1
                     }
+                    let newPhotos = photoResults.map { Photo($0, date: self.dateFormatter) }
                     self.photos.append(contentsOf: newPhotos)
-                    self.lastLoadedPage = nextPage
-                    NotificationCenter.default.post(
-                        name: .didChangeNotification,
-                        object: self,
-                        userInfo: ["Array": newPhotos]
-                    )
+                    NotificationCenter.default.post(name: ImagesListService.didChangeNotification, object: nil)
                 case .failure(let error):
-                    assertionFailure("\(error)")
+                    print(error.localizedDescription)
                 }
             }
+            self.currentTask = nil
         }
+        self.currentTask = task
         task.resume()
     }
     
+    // MARK: Response Change Like
     func changeLike(photoId: String, isLike: Bool, _ complition: @escaping (Result<Void, Error>) -> Void) {
+        if currentTask != nil {
+            currentTask?.cancel()
+        }
         
         guard let request = makeLikeRequest(photoId: photoId, isLike: isLike) else {
-            print("[changeLike]: Запрос статуса лайка не удался")
+            print("[changeLike]: Ошибка получения статуса лайка")
             return
         }
         
@@ -93,15 +87,25 @@ final class ImagesListService {
                 }
             }
         }
+        self.currentTask = task
         task.resume()
     }
+    
+    // MARK: Requests
+    private func makeRequest(page: Int) -> URLRequest? {
+        let queryItems = [
+            URLQueryItem(name: "page", value: "\(page)"),
+            URLQueryItem(name: "per_page", value: "10")
+        ]
+        return URLRequest.makeHTTPRequest(path: "/photos",
+                                          httpMethod: "GET",
+                                          queryItems: queryItems,
+                                          baseURL: String(describing: Constants.defaultBaseURL))
+    }
+    
     private func makeLikeRequest(photoId: String, isLike: Bool) -> URLRequest? {
         URLRequest.makeHTTPRequest(path: "/photos/\(photoId)/like",
                                    httpMethod: isLike ? "POST" : "DELETE",
-                                   baseURL: String(describing: DefaultBaseURL))
+                                   baseURL: String(describing: Constants.defaultBaseURL))
     }
-}
-
-extension Notification.Name {
-    static let didChangeNotification = Notification.Name("ImagesListServiceDidChange")
 }
